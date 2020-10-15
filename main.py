@@ -13,7 +13,9 @@ def graph_generator(file_path):
     for edge in edges:
         u = int(edge.split(" ")[1])
         v = int(edge.split(" ")[2])
-        graph.add_edge(u, v)
+        if not graph.has_edge(u,v):
+            graph.add_edge(u, v)
+
     return graph
 
 #degree analysis
@@ -42,7 +44,59 @@ def analyze(graph,degree_distribution = False, visualization=False):
 # call all functions for analysis #write the variables to get desired output
 def main():
     graph = graph_generator('datasets/USairport_2010.txt')
-    analyze(graph,degree_distribution=True, visualization=False)
+    random_G = nx.gnm_random_graph(10220, 49812)
+
+    num_nodes = graph.number_of_nodes()
+    num_nodes_rand = random_G.number_of_nodes()
+
+    num_edges = graph.number_of_edges()
+    num_edges_rand = graph.number_of_edges()
+
+    deg = nx.degree_histogram(graph)
+    deg_rand = nx.degree_histogram(random_G)
+
+    max_value=max(deg)
+    i=0
+    while i<len(deg) :
+        if deg[i] == max_value:
+            common_degree = i
+            break
+        i+=1
+
+    i=0
+    max_value = max(deg_rand)
+    while i<len(deg_rand) :
+        if deg_rand[i] == max_value:
+            common_degree_rand = i
+            break
+        i+=1
+
+    print("Airport Graph:")
+    print('')
+
+    print('number of nodes:', num_nodes)
+    print('number of edges:', num_edges)
+    print('maximum degree of the graph:', len(deg)-1)
+    print('average degree:', num_edges / num_nodes)
+    print('most common degree :', common_degree)
+    print('')
+    print('')
+    print('')
+
+    #analyze(graph,degree_distribution=True, visualization=False)
+
+    print('Random Graph')
+    print('')
+
+    print('number of nodes:', num_nodes_rand)
+    print('number of edges:', num_edges_rand)
+    print('maximum degree of the graph:', len(deg_rand) - 1)
+    print('average degree:',num_edges_rand/num_nodes_rand)
+    print('most common degree in the graph:', common_degree_rand)
+
+    #analyze(random_G, degree_distribution=True, visualization=False)
+
+
 
 
 if __name__ == '__main__':
