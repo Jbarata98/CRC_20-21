@@ -1,0 +1,4 @@
+numpy
+powerlaw
+networkx
+collections
