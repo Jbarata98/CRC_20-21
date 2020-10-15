@@ -28,7 +28,7 @@ def degree_dist(G):
 
 #main function that analyzes
 #depends on the variables
-def analyze(graph,degree_distribution = False, visualization=False):
+def analyze(graph,degree_distribution = False, visualization=True):
     if degree_distribution:
         degree_dist(graph)
     if visualization:
@@ -101,6 +101,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 
