@@ -35,33 +35,38 @@ def degree_dist(G,global_degree):
     num_nodes = G.number_of_nodes()
     num_edges = G.number_of_edges()
     deg_hist = nx.degree_histogram(G)                                   # degrees histogram
-    #print("deg_hist:", deg_hist)
+    print("deg_hist:", deg_hist)
     prob_deg_hist=[d/num_nodes for d in deg_hist]
     n_node_degs=[deg for deg in range(len(deg_hist))]                   # nr of nodes that have the degree deg
     degrees = sorted([deg for node, deg in G.degree()], reverse=True)
     degreeCount = collections.Counter(degrees)
-    #cum_degree = cum_degree_dist(global_degree, prob_deg_hist)
+    cum_degree = cum_degree_dist(global_degree, prob_deg_hist)
+    bc = nx.betweenness_centrality(G, normalized=False)
     closeness = nx.closeness_centrality(G)
     degcentrality = nx.degree_centrality(G)
-    bc = nx.betweenness_centrality(G, normalized=False)
-    #print('number of nodes:', num_nodes)
-    #print('number of edges:', num_edges)
+    print('number of nodes:', num_nodes)
+    print('number of edges:', num_edges)
+    #print('nr of connected components?:', nx.number_connected_components(G))
+    components = list(nx.connected_components(G))
+    print("len connected components: ", [len(c) for c in components])
+    print('avg shortest path length:', nx.average_shortest_path_length(G))
+    #print('is connected?:', nx.is_connected(G))
+    print("most common degree in the graph:", max(degreeCount, key=degreeCount.get))
+    print("average degree of the graph is:", 2*(num_edges) / num_nodes)
+    print("maximum degree of the graph:", degrees[0])
+    print("cumulative degree: ", cum_degree)
     print("node with max betweeness centrality: ", sorted(bc.items(), key=operator.itemgetter(1), reverse=True)[:5])
-    #print("most common degree in the graph:", max(degreeCount, key=degreeCount.get))
-    #print("average degree of the graph is:", num_edges / num_nodes)
-    #print("maximum degree of the graph:", degrees[0])
-    #print("cumulative degree: ", cum_degree)
     print("closeness centrality:", sorted(closeness.items(), key=operator.itemgetter(1), reverse=True)[:5])
     print("degreee centrality:", sorted(degcentrality.items(), key=operator.itemgetter(1), reverse=True)[:5])
-    
-    #return num_nodes,num_edges,deg_hist,prob_deg_hist,n_node_degs,degreeCount,cum_degree # bc missing
+    return num_nodes,num_edges,deg_hist,prob_deg_hist,n_node_degs,degreeCount,cum_degree # bc missing
 
 def plot_degree_maker(n_nodes_degs,p_cum,p_cum_rand):
     results = powerlaw.Fit(p_cum)
+    print("alpha:" , results.power_law.alpha)
     fig2, axs2 = plt.subplots(figsize=(8, 6))
     plt.loglog(n_nodes_degs, p_cum, color='black')
-    plt.loglog(n_nodes_degs, p_cum_rand, color='blue')
-    plt.loglog(n_nodes_degs, [pow(k, -results.power_law.alpha) for k in n_nodes_degs], color='red')
+    #plt.loglog(n_nodes_degs, p_cum_rand, color='blue')
+    plt.loglog(n_nodes_degs, [pow(k, -(results.power_law.alpha -1.2))for k in n_nodes_degs], color='red')
     plt.title("Cumulative Degree Distribution in a log-log scale", fontsize=17)
     plt.ylabel("$P_{cum}k$", fontsize=20)
     plt.xlabel("k", fontsize=20)
@@ -78,7 +83,6 @@ def analyze_graph(graph,airport_degrees,degree_analysis = False, visualization=T
         plt.savefig("Graph.png",format="PNG")
 
 
-
 def preferential(N, m0, m, alpha, seed=None):
     if m < 1 or  m >=N or alpha<0: 
             raise nx.NetworkXError(" network must have m >= 1"
@@ -90,25 +94,23 @@ def preferential(N, m0, m, alpha, seed=None):
     m00 = range(m0)
     G.add_nodes_from(m00)
     G.add_edge(0, 1)
-    #print(G.edges)
+    print(G.edges)
     for j in range(m0, N):
         G.add_node(j)
-        #print("nodes:"+str(G.nodes))
+        print("nodes:"+str(G.nodes))
         probs = []
         for i in G.nodes:
             probs.append(G.degree(i)**alpha)
-        #print('probs:' +str(probs))
+        print('probs:' +str(probs))
         sumprobs = sum(probs)
         listprobs = [x / sumprobs for x in probs]
-        #print('listprobs:'+str(listprobs))
+        print('listprobs:'+str(listprobs))
         links = np.random.choice(G.nodes, m, p=listprobs, replace=False) 
-        #print('link:'+str(links))
+        print('link:'+str(links))
         for l in links:
             G.add_edge(l,i)
-        #print('edges:'+str(G.edges))
+        print('edges:'+str(G.edges))
     return G
-
-#preferential(5, 2, 2, 1)
 
 
 # call all functions for analysis #write the variables to get desired output
@@ -119,10 +121,13 @@ def main():
     n_nodes_degrees = [deg for deg in range(len(airport_degrees))]
     print("US Airport Graph:\n")
     num_nodes,num_edges,deg_hist,prob_deg_hist,n_node_degs,degreeCount,cum_degree = analyze_graph(graph,airport_degrees,degree_analysis=True, visualization=False)  #analysis of graph
-    print("\nRandom Graph:\n")
+    print("\n Random Graph:\n")
     num_nodes_rand,num_edges_rand,deg_hist_rand,prob_deg_hist_rand,n_node_degs_rand,degreeCount_rand,cum_degree_rand = analyze_graph(random_G,airport_degrees,degree_analysis=True, visualization=False) #analysis of random graph
     print("\n Plotting Graph...\n")
     plot_degree_maker(n_nodes_degrees,cum_degree,cum_degree_rand)
+    print("\n Preferential Attachment Simulations:\n")
+    preferential(5, 2, 2, 1)
+
 
 if __name__ == '__main__':
     main()
