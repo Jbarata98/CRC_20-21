@@ -35,21 +35,26 @@ def degree_dist(G,global_degree):
     num_nodes = G.number_of_nodes()
     num_edges = G.number_of_edges()
     deg_hist = nx.degree_histogram(G)                                   # degrees histogram
-    print("deg_hist:", deg_hist)
+    #print("deg_hist:", deg_hist)
     prob_deg_hist=[d/num_nodes for d in deg_hist]
     n_node_degs=[deg for deg in range(len(deg_hist))]                   # nr of nodes that have the degree deg
     degrees = sorted([deg for node, deg in G.degree()], reverse=True)
     degreeCount = collections.Counter(degrees)
-    cum_degree = cum_degree_dist(global_degree, prob_deg_hist)
-    #bc = nx.betweenness_centrality(G, normalized=False)
-    print('number of nodes:', num_nodes)
-    print('number of edges:', num_edges)
-    #print("node with max betweeness centrality: ", max(bc, key=bc.get))
-    print("most common degree in the graph:", max(degreeCount, key=degreeCount.get))
-    print("average degree of the graph is:", num_edges / num_nodes)
-    print("maximum degree of the graph:", degrees[0])
-    print("cumulative degree: ", cum_degree)
-    return num_nodes,num_edges,deg_hist,prob_deg_hist,n_node_degs,degreeCount,cum_degree # bc missing
+    #cum_degree = cum_degree_dist(global_degree, prob_deg_hist)
+    closeness = nx.closeness_centrality(G)
+    degcentrality = nx.degree_centrality(G)
+    bc = nx.betweenness_centrality(G, normalized=False)
+    #print('number of nodes:', num_nodes)
+    #print('number of edges:', num_edges)
+    print("node with max betweeness centrality: ", sorted(bc.items(), key=operator.itemgetter(1), reverse=True)[:5])
+    #print("most common degree in the graph:", max(degreeCount, key=degreeCount.get))
+    #print("average degree of the graph is:", num_edges / num_nodes)
+    #print("maximum degree of the graph:", degrees[0])
+    #print("cumulative degree: ", cum_degree)
+    print("closeness centrality:", sorted(closeness.items(), key=operator.itemgetter(1), reverse=True)[:5])
+    print("degreee centrality:", sorted(degcentrality.items(), key=operator.itemgetter(1), reverse=True)[:5])
+    
+    #return num_nodes,num_edges,deg_hist,prob_deg_hist,n_node_degs,degreeCount,cum_degree # bc missing
 
 def plot_degree_maker(n_nodes_degs,p_cum,p_cum_rand):
     results = powerlaw.Fit(p_cum)
