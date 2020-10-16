@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import operator
 import powerlaw
 import numpy as np
+import random
 
 
 #function that receives a file and generates the graph
@@ -72,6 +73,39 @@ def analyze_graph(graph,airport_degrees,degree_analysis = False, visualization=T
         plt.savefig("Graph.png",format="PNG")
 
 
+
+def preferential(N, m0, m, alpha, seed=None):
+    if m < 1 or  m >=N or alpha<0: 
+            raise nx.NetworkXError(" network must have m >= 1"
+                                   ", alpha > 0 "
+                               " and m < n, m = %d, n = %d, alpha=%d" % (m, N, alpha)) 
+    if seed is not None: 
+            random.seed(seed) 
+    G= nx.Graph()
+    m00 = range(m0)
+    G.add_nodes_from(m00)
+    G.add_edge(0, 1)
+    #print(G.edges)
+    for j in range(m0, N):
+        G.add_node(j)
+        #print("nodes:"+str(G.nodes))
+        probs = []
+        for i in G.nodes:
+            probs.append(G.degree(i)**alpha)
+        #print('probs:' +str(probs))
+        sumprobs = sum(probs)
+        listprobs = [x / sumprobs for x in probs]
+        #print('listprobs:'+str(listprobs))
+        links = np.random.choice(G.nodes, m, p=listprobs, replace=False) 
+        #print('link:'+str(links))
+        for l in links:
+            G.add_edge(l,i)
+        #print('edges:'+str(G.edges))
+    return G
+
+#preferential(5, 2, 2, 1)
+
+
 # call all functions for analysis #write the variables to get desired output
 def main():
     graph = graph_generator('datasets/USairport_2010.txt')
@@ -87,7 +121,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
