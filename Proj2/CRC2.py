@@ -4,8 +4,8 @@ import collections
 import matplotlib.pyplot as plt
 
 ger = 1000
-N = 500
-rondas = 5
+N = 100
+rondas = 1
 mut1, mut2, mut3, mut4, mut5, mut6 = 0.001, 0.002, 0.01, 0.02, 0.1, 0.2
 average_list = []                                       # lista dos average de cada geracao
 
@@ -74,8 +74,8 @@ def random_encounters(popl, ron, ger):
         i = 0
         while i < N / 10 + 3 * N / 100:                   # calculates new population taking into account the mutations
             if rand.random() < popl[person][2] * 10:
-                new_p = rand.uniform(popl[person][0] - popl[person][0] * mut3, popl[person][0] + popl[person][0] * mut3)
-                new_q = rand.uniform(popl[person][1] - popl[person][1] * mut3, popl[person][1] + popl[person][1] * mut3)
+                new_p = rand.uniform(popl[person][0] - popl[person][0] * mut5, popl[person][0] + popl[person][0] * mut5)
+                new_q = rand.uniform(popl[person][1] - popl[person][1] * mut5, popl[person][1] + popl[person][1] * mut5)
                 popl_new['S' + str(j + 1)] = [new_p, new_q, 0]
                 '''print('old_p:',popl[person][0])
                 print('new_p:',new_p)
