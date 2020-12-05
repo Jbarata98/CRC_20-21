@@ -7,6 +7,7 @@ ger = 1000
 N = 100
 rondas = 1
 mut1, mut2, mut3, mut4, mut5, mut6 = 0.001, 0.002, 0.01, 0.02, 0.1, 0.2
+mut = mut1
 average_list = []                                       # lista dos average de cada geracao
 
 population = collections.defaultdict(list)
@@ -16,7 +17,7 @@ population = collections.defaultdict(list)
 def populate(popl):                                     # populates our sample
     i = 1
     while i <= N:
-        popl['S' + str(i)] = [rand.random(), rand.random(), 0]
+        popl['S' + str(i)] = [rand.uniform(0,1),rand.uniform(0,1), 0]
         i += 1
     # print("population:\n", popl)
     return popl
@@ -44,46 +45,41 @@ def random_encounters(popl, ron, ger):
 
     for person in popl.keys():
         popl[person][2] /= payoff_total
-        '''Experiencias do Ze Maluco'''
-        # if popl[person][2] > min(top5):
-        #     if top5[0] == min(top5):
-        #         top5[0] = popl[person][2]
-        #         top5_p[0] = popl[person][0]
-        #         top5_q[0] = popl[person][1]
-        #     elif top5[1] == min(top5):
-        #         top5[1] = popl[person][2]
-        #         top5_p[1] = popl[person][0]
-        #         top5_q[1] = popl[person][1]
-        #     elif top5[2] == min(top5):
-        #         top5[2] = popl[person][2]
-        #         top5_p[2] = popl[person][0]
-        #         top5_q[2] = popl[person][1]
-        #     elif top5[3] == min(top5):
-        #         top5[3] = popl[person][2]
-        #         top5_p[3] = popl[person][0]
-        #         top5_q[3] = popl[person][1]
-        #     else:
-        #         top5[4] = popl[person][2]
-        #         top5_p[4] = popl[person][0]
-        #         top5_q[4] = popl[person][1]
 
         average_p += popl[person][0]
         average_q += popl[person][1]
 
+        # calculates new population taking into account the mutations
+    l_popl = list(popl.keys())
+    # print("popl:\n", popl)
+    i = 0
+    while i < N:
+        comparing = 0
+        r = rand.random()
+        p = 0
+        r_t = False
+        var = i
+        while p < N:
+            comparing += popl[l_popl[var - p]][2]
+            if r < comparing:
 
-        i = 0
-        while i < N / 10 + 3 * N / 100:                   # calculates new population taking into account the mutations
-            if rand.random() < popl[person][2] * 10:
-                new_p = rand.uniform(popl[person][0] - popl[person][0] * mut5, popl[person][0] + popl[person][0] * mut5)
-                new_q = rand.uniform(popl[person][1] - popl[person][1] * mut5, popl[person][1] + popl[person][1] * mut5)
-                popl_new['S' + str(j + 1)] = [new_p, new_q, 0]
-                '''print('old_p:',popl[person][0])
-                print('new_p:',new_p)
-                print('old_q:',popl[person][1])
-                print('new_q:',new_q)'''
-                j += 1
-            i += 1
-    print('--------RONDA:------------', ronda, '----Geracao:-----', geracao)
+                r_t = True
+                new_p = rand.uniform(popl[l_popl[var - p]][0] - popl[l_popl[var - p]][0] * mut, popl[l_popl[var - p]][0] + popl[l_popl[var - p]][0] * mut)
+                new_q = rand.uniform(popl[l_popl[var - p]][1] - popl[l_popl[var - p]][1] * mut, popl[l_popl[var - p]][1] + popl[l_popl[var - p]][1] * mut)
+                popl_new['S' + str(i + 1)] = [new_p, new_q, 0]
+                break
+            p+=1
+        if not r_t:
+            new_p = rand.uniform(popl[l_popl[i]][0] - popl[l_popl[i]][0] * mut,
+                                 popl[l_popl[i]][0] + popl[l_popl[i]][0] * mut)
+            new_q = rand.uniform(popl[l_popl[i]][1] - popl[l_popl[i]][1] * mut,
+                                 popl[l_popl[i]][1] + popl[l_popl[i]][1] * mut)
+            popl_new['S' + str(i + 1)] = [new_p, new_q, 0]
+        i += 1
+
+    # print("popl_new:\n", popl_new)
+    # print('--------RONDA:------------', ronda, '----Geracao:-----', geracao)
+
     '''print('top 5 payoff:', top5)
     print('top 5 pespes:', top5_p)
     print('top 5 quesques:', top5_q)'''
@@ -103,7 +99,7 @@ def random_encounters(popl, ron, ger):
             num_rands.append(r)
             del (popl_new['S' + str(r)])
     # payof_frac_tot+= popl[person][2] # has to be 1 in the end
-    return popl_new
+    return popl_new,payoff_total
 
 
 def main():
@@ -112,15 +108,20 @@ def main():
     for j in range(0, rondas):
         geracao = 0
         for i in range(0, ger):
-            popl_new = random_encounters(popl_sample, ronda, geracao)
+            popl_new, payoff_total = random_encounters(popl_sample, ronda, geracao)
             # print(len(popl_new))
             # print(popl_sample)
             # print(popl_new)
             popl_sample = popl_new
             geracao += 1
+
+            if payoff_total >= 4900:
+                print("geracao:",geracao,"\npopl:",popl_new)
+
+
         ronda += 1
 
-    print(average_list)
+    # print(average_list)
     p_list, q_list = [], []
     for i in average_list:
         to_append_p, to_append_q = 0, 0

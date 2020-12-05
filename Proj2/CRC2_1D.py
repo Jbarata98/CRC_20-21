@@ -3,7 +3,12 @@ import collections
 import random as rand
 import matplotlib.pyplot as plt
 
-Ger = 10000
+import imageio
+
+
+import numpy as np
+
+Ger = 100000
 N = 100
 Rondas = 1
 mut1, mut2, mut3, mut4, mut5, mut6 = 0.001, 0.002, 0.01, 0.02, 0.1, 0.2
@@ -198,6 +203,7 @@ def encounters_1D(popul, ger_nr, checkpoints):
     return popl_new
 
 
+
 # computes the check points scatter plot
 def checkpoint_plot(p_q,population,ger):
     fig,ax = plt.subplots(figsize=(8, 6))
@@ -208,6 +214,12 @@ def checkpoint_plot(p_q,population,ger):
     plt.ylim([0, 1])
     ax.grid(True)
     ax.legend()
+
+    fig.canvas.draw()  # draw the canvas, cache the renderer
+    image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
+    image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+    return image
+
     plt.show()
 
 
@@ -252,19 +264,22 @@ def main():
         p_list.append(to_append_p)
         q_list.append(to_append_q)
         i+=1
-    #
-    # for ger in checkpoints_dict.keys():
-    #     checkpoint_plot(checkpoints_dict,N,ger)
-    plt.subplots(figsize=(8, 6))
-    plt.title('$\\bar{p}$ and $\\bar{q}$ variation over time'), plt.ylabel('Probability', fontsize=16), plt.xlabel(
-        '$log_{10}t$', fontsize=16)
 
-    plt.plot(range(Ger), p_list, color='blue', label="average_p", linestyle='--')
-    plt.plot(range(Ger), q_list, color='red', label="average_q", linestyle='--')
-    plt.xscale("log")
-    plt.ylim([0, 1])
-    plt.legend(['$\\bar{p}$-value', '$\\bar{q}$-value'])
+    for ger in checkpoints_dict.keys():
+        checkpoint_plot(checkpoints_dict,N,ger)
+
     plt.show()
+    imageio.mimsave('demo.gif', [checkpoint_plot(checkpoints_dict,N,ger) for ger in checkpoints_dict.keys()], fps=1)
+    # plt.subplots(figsize=(8, 6))
+    # plt.title('$\\bar{p}$ and $\\bar{q}$ variation over time'), plt.ylabel('Probability', fontsize=16), plt.xlabel(
+    #     '$log_{10}t$', fontsize=16)
+    #
+    # plt.plot(range(Ger), p_list, color='blue', label="average_p", linestyle='--')
+    # plt.plot(range(Ger), q_list, color='red', label="average_q", linestyle='--')
+    # plt.xscale("log")
+    # plt.ylim([0, 1])
+    # plt.legend(['$\\bar{p}$-value', '$\\bar{q}$-value'])
+    # plt.show()
     return 0
 
 
